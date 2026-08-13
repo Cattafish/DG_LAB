@@ -34,7 +34,7 @@ public class QRScreen extends Screen {
         
         if (this.qrIdentifier != null) {
             // 在屏幕中央绘制 160x160 尺寸的二维码
-            context.drawTexture(this.qrIdentifier, this.width / 2 - 80, this.height / 2 - 90, 0.0F, 0.0F, 160, 160, 256, 256);
+            context.drawTexture(this.qrIdentifier, this.width / 2 - 80, this.height / 2 - 90, 0.0F, 0.0F, 160, 160, 160, 160);
         } else {
             context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("二维码生成失败"), this.width / 2, this.height / 2, 0xFF5555);
         }
