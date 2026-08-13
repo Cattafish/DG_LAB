@@ -1,6 +1,5 @@
 package online.kbpf.dg_lab.client.screen;
 
-
 import online.kbpf.dg_lab.client.Dg_labClient;
 import online.kbpf.dg_lab.client.createQR.ToolQR;
 import online.kbpf.dg_lab.client.Config.ModConfig;
@@ -20,7 +19,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static online.kbpf.dg_lab.client.screen.ConfigScreen.*;
-
 
 @Environment(EnvType.CLIENT)
 public class WebSocketConfigScreen extends Screen {
@@ -46,7 +44,6 @@ public class WebSocketConfigScreen extends Screen {
     public void close() {
         Screen configScreen = new ConfigScreen();
         client.setScreen(configScreen);
-
     }
 
     @Override
@@ -59,14 +56,16 @@ public class WebSocketConfigScreen extends Screen {
             } else {
                 modConfig.setAutoStartWebSocketServer(true);
                 autoStartWebSocketServer.setMessage(Text.literal("自动启动连接服务器:已开启"));
-
             }
 
         }).dimensions(width / 2 - (int) (width * 0.41), 20, (int) (width * 0.4), ButtonHeight).tooltip(Tooltip.of(Text.literal("要在客户端启动时自动启动连接服务器\n如果关闭需要使用指令手动启动\n非必要无需关闭"))).build();
 
-        createQR = ButtonWidget.builder(Text.literal("创建连接二维码并打开"), button -> {
-            ToolQR.CreateQR();
-        }).dimensions(width / 2 + 5, 20, (int) (width * 0.4), ButtonHeight).tooltip(Tooltip.of(Text.literal("图片默认生成于此地址:\n" + System.getProperty("user.dir")))).build();
+        createQR = ButtonWidget.builder(Text.literal("显示连接二维码"), button -> {
+            net.minecraft.util.Identifier qrId = ToolQR.CreateQR();
+            if(qrId != null) {
+                client.setScreen(new QRScreen(this, qrId));
+            }
+        }).dimensions(width / 2 + 5, 20, (int) (width * 0.4), ButtonHeight).tooltip(Tooltip.of(Text.literal("在游戏内显示二维码\n（图片同时保存于游戏根目录）"))).build();
 
         host = new TextFieldWidget(this.textRenderer, (int) (width * 0.66), 20 + ButtonHeight + ButtonDistance, (int) (width * 0.25), ButtonHeight, Text.literal("Enter address..."));
         host.setText(modConfig.getAddress());
@@ -94,7 +93,6 @@ public class WebSocketConfigScreen extends Screen {
         serverPort1 = ButtonWidget.builder(Text.literal("?"), button -> {
         }).dimensions((int) (width * 0.63), 3 * (ButtonHeight + ButtonDistance) + 20, (int) (width * 0.03), ButtonHeight).tooltip(Tooltip.of(Text.literal("服务器对外开放的端口\n非必要无需修改\n修改后请保存重启客户端生效"))).build();
 
-
         addDrawableChild(createQR);
         addDrawableChild(autoStartWebSocketServer);
         addDrawableChild(host);
@@ -106,26 +104,19 @@ public class WebSocketConfigScreen extends Screen {
         addDrawable(serverPort1);
     }
 
-
-    private Timer timer = new Timer(); // 定义一个计时器
+    private Timer timer = new Timer();
 
     private void hostText(String Text) {
-
-        // 重置计时器
         if (timer != null) {
             timer.cancel();
         }
-
-        // 启动一个新的计时器，延迟更新
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                // 停止输入一段时间后的操作
                 modConfig.setAddress(Text);
             }
-        }, 1000); // 延迟时间为 1000ms
-
+        }, 1000);
     }
 
     private void toggleNetworkAdapter(){
@@ -150,22 +141,17 @@ public class WebSocketConfigScreen extends Screen {
         try {
             number = Integer.parseInt(port);
             number = (number > 65535 || number < 0) ? 9999 : number;
-
         } catch (NumberFormatException e) {
             number = 9999;
         }
         modConfig.setPort(number);
-
-
     }
-
 
     private void serverPortText(String serverPort) {
         int number;
         try {
             number = Integer.parseInt(serverPort);
             number = (number > 65535 || number < 0) ? 9999 : number;
-
         } catch (NumberFormatException e) {
             number = 9999;
         }
@@ -180,8 +166,5 @@ public class WebSocketConfigScreen extends Screen {
         context.drawText(textRenderer, Text.literal(modConfig.getNetwork()), (int) (width * 0.1), 61, 0xaaaaaa, false);
         context.drawTextWithShadow(textRenderer, Text.literal("二维码连接的端口"), (int) (width * 0.1), 74, 0xffffff);
         context.drawTextWithShadow(textRenderer, Text.literal("服务器开放的端口"), (int) (width * 0.1), 99, 0xffffff);
-
-
     }
-
 }
