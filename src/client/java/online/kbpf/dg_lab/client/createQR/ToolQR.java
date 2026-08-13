@@ -44,7 +44,7 @@ public class ToolQR {
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
             hints.put(EncodeHintType.MARGIN, 1);
 
-            int size = 256;
+            int size = 160;
             BitMatrix bitMatrix = new MultiFormatWriter().encode(url.toString(), BarcodeFormat.QR_CODE, size, size, hints);
 
             BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
