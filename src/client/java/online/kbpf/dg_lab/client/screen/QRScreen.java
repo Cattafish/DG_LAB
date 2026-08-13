@@ -23,7 +23,7 @@ public class QRScreen extends Screen {
     protected void init() {
         this.addDrawableChild(ButtonWidget.builder(Text.literal("返回"), button -> {
             this.client.setScreen(this.parent);
-        }).dimensions(this.width / 2 - 100, this.height / 2 + 100, 200, 20).build());
+        }).dimensions(this.width / 2 - 100, this.height / 2 + 105, 200, 20).build());
     }
 
     @Override
@@ -33,8 +33,17 @@ public class QRScreen extends Screen {
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, this.height / 2 - 110, 0xFFFFFF);
         
         if (this.qrIdentifier != null) {
-            // 在屏幕中央绘制 160x160 尺寸的二维码
-            context.drawTexture(this.qrIdentifier, this.width / 2 - 80, this.height / 2 - 90, 0.0F, 0.0F, 160, 160, 160, 160);
+            // 在屏幕中央绘制 180x180 大小的完整二维码（全比例无缝拉伸渲染，无大白边）
+            int renderSize = 180;
+            context.drawTexture(
+                this.qrIdentifier,
+                this.width / 2 - renderSize / 2,
+                this.height / 2 - 95,
+                renderSize, renderSize,
+                0.0F, 0.0F,
+                1, 1,
+                1, 1
+            );
         } else {
             context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("二维码生成失败"), this.width / 2, this.height / 2, 0xFF5555);
         }
