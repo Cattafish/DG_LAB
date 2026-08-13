@@ -42,28 +42,33 @@ public class ToolQR {
             Map<EncodeHintType, Object> hints = new HashMap<>();
             hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-            hints.put(EncodeHintType.MARGIN, 1);
+            hints.put(EncodeHintType.MARGIN, 1); // 极窄边框：只保留 1 个小方块宽度的白边
 
-            int size = 160;
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(url.toString(), BarcodeFormat.QR_CODE, size, size, hints);
+            // 1. 传入 0, 0，让 ZXing 生成无多余填充的原始矩阵
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(url.toString(), BarcodeFormat.QR_CODE, 0, 0, hints);
+            int matrixWidth = bitMatrix.getWidth();
+            int matrixHeight = bitMatrix.getHeight();
 
-            BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-            NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, size, size, false);
+            // 2. 将每个二维码小方块精准放大 6 倍
+            int scale = 6;
+            int sizeX = matrixWidth * scale;
+            int sizeY = matrixHeight * scale;
 
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    boolean bit = bitMatrix.get(x, y);
+            BufferedImage image = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
+            NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, sizeX, sizeY, false);
+
+            for (int x = 0; x < sizeX; x++) {
+                for (int y = 0; y < sizeY; y++) {
+                    boolean bit = bitMatrix.get(x / scale, y / scale);
                     int color = bit ? 0xFF000000 : 0xFFFFFFFF;
                     image.setRGB(x, y, color);
                     nativeImage.setColor(x, y, color);
                 }
             }
 
-            // 仍旧写出 QR.png 文件到游戏本地目录（删除了 cmd 弹窗指令）
             File qrCodeFile = new File(filePath);
             ImageIO.write(image, "png", qrCodeFile);
 
-            // 注册为 Minecraft 动态纹理供游戏内 UI 使用
             NativeImageBackedTexture texture = new NativeImageBackedTexture(nativeImage);
             Identifier identifier = Identifier.of("dg_lab", "dynamic_qr_code");
             MinecraftClient.getInstance().getTextureManager().registerTexture(identifier, texture);
